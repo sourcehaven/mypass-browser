@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "baseUrl": "src",
+    "rootDir": "src",
     "target": "es5",
     "lib": [
       "dom",
@@ -11,6 +13,7 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
+    "alwaysStrict": true,
     "forceConsistentCasingInFileNames": true,
     "module": "esnext",
     "moduleResolution": "node",
@@ -22,5 +25,12 @@
   },
   "include": [
     "src"
+  ],
+  "exclude": [
+    "_*.js",
+    "_*.ts",
+    "node_modules",
+    "dist",
+    "build"
   ]
 }

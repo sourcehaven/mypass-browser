@@ -1,7 +1,8 @@
-import React, { Fragment } from 'react'
-import Counter from '../components/counter/Counter'
+import { Fragment } from "react";
+import Counter from "../components/counter/Counter";
+import { Navbar } from "components/Navbar";
 
-export const Home: React.FC = () => {
+export const Home = () => {
   return (
     <Fragment>
       <h1>Redux + TypeScript</h1>
@@ -12,5 +13,5 @@ export const Home: React.FC = () => {
       </p>
       <Counter />
     </Fragment>
-  )
-}
+  );
+};

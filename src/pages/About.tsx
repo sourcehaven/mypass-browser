@@ -1,8 +1,8 @@
-import React, { Fragment } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Fragment } from "react";
+import { useNavigate } from "react-router-dom";
 
-export const About: React.FC = () => {
-  const navigate = useNavigate()
+export const About = () => {
+  const navigate = useNavigate();
 
   return (
     <Fragment>
@@ -17,10 +17,10 @@ export const About: React.FC = () => {
         type="button"
         className="btn"
         cy-data="go-back-button"
-        onClick={() => navigate('/')}
+        onClick={() => navigate("/")}
       >
         Go back
       </button>
     </Fragment>
-  )
-}
+  );
+};

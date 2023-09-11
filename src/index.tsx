@@ -1,16 +1,22 @@
-import { createRoot } from 'react-dom/client'
-import { Provider } from 'react-redux'
-import store from './store'
+import React from "react";
+import { createRoot } from "react-dom/client";
+import { Provider } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
 
-import './index.css'
+import "./index.scss";
 
-import App from './App'
+import store, { persistor } from "state";
+import App from "./App";
 
-const container = document.getElementById('root') as HTMLDivElement
-const root = createRoot(container!)
+const container = document.getElementById("root") as HTMLDivElement;
+const root = createRoot(container!);
 
 root.render(
-  <Provider store={store}>
-    <App />
-  </Provider>
-)
+  <React.StrictMode>
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <App />
+      </PersistGate>
+    </Provider>
+  </React.StrictMode>
+);
