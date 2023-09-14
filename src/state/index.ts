@@ -3,7 +3,6 @@ import { connectRouter } from "connected-react-router";
 import { createBrowserHistory } from "history";
 
 import authReducer from "./auth";
-import counterReducer from "./counter";
 import storage from "redux-persist/lib/storage";
 import {
   PersistConfig,
@@ -22,7 +21,6 @@ export const history = createBrowserHistory();
 const combinedReducer = combineReducers({
   router: connectRouter(history),
   auth: authReducer,
-  counter: counterReducer,
 });
 
 export type RootState = ReturnType<typeof combinedReducer>;

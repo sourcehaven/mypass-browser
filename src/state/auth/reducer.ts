@@ -15,6 +15,7 @@ const initialState: State = {
   logoutError: false,
 };
 
+export const getLogin = createAsyncThunk("auth/getLogin", api.getLogin);
 export const login = createAsyncThunk("auth/login", api.login);
 export const logout = createAsyncThunk("auth/logout", api.logout);
 
@@ -23,6 +24,20 @@ const slice = createSlice({
   initialState,
   reducers: {},
   extraReducers: (builder) => {
+    builder.addCase(getLogin.pending, (state) => ({
+      ...state,
+      loading: true,
+    }));
+    builder.addCase(getLogin.fulfilled, (state) => ({
+      ...state,
+      loading: false,
+      loggedIn: true,
+    }));
+    builder.addCase(getLogin.rejected, (state) => ({
+      ...state,
+      loading: false,
+      loggedIn: false,
+    }));
     builder.addCase(login.pending, (state) => ({
       ...state,
       loading: true,
@@ -58,6 +73,6 @@ const slice = createSlice({
   },
 });
 
-export const actions = slice.actions;
+export const actions = { ...slice.actions, getLogin, login, logout };
 
 export default slice.reducer;

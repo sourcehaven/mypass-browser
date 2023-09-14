@@ -18,21 +18,22 @@ export const configure = () => {
 
   // default header configs
   client.defaults.headers.common["Access-Control-Allow-Origin"] = "*";
-  client.defaults.headers.common.Authorization = `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`;
 
   // request interceptor for configuring authorization headers
   client.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
-    if (config.url && config.url === "/api/auth/login") {
-      const refreshToken = localStorage.getItem(REFRESH_TOKEN);
-      config.headers.Authorization = `Bearer ${refreshToken}`;
-      return config;
-    } else if (config.url && config.url === "/api/auth/refresh") {
-      const refreshToken = localStorage.getItem(REFRESH_TOKEN);
-      config.headers.Authorization = `Bearer ${refreshToken}`;
-      return config;
+    if (config.validateStatus) {
+      if (config.url && config.url === "/api/auth/login") {
+        const refreshToken = localStorage.getItem(REFRESH_TOKEN);
+        config.headers.Authorization = `Bearer ${refreshToken}`;
+        return config;
+      } else if (config.url && config.url === "/api/auth/refresh") {
+        const refreshToken = localStorage.getItem(REFRESH_TOKEN);
+        config.headers.Authorization = `Bearer ${refreshToken}`;
+        return config;
+      }
+      const accessToken = localStorage.getItem(ACCESS_TOKEN);
+      config.headers.Authorization = `Bearer ${accessToken}`;
     }
-    const accessToken = localStorage.getItem(ACCESS_TOKEN);
-    config.headers.Authorization = `Bearer ${accessToken}`;
     return config;
   });
   // camelCase to snake_case converter interceptor (backend api uses snake_case)
@@ -49,8 +50,10 @@ export const configure = () => {
       }
     };
 
-    const data = config.data;
-    traverse(data, transform);
+    if (config.validateStatus) {
+      const data = config.data;
+      traverse(data, transform);
+    }
     return config;
   });
 
@@ -69,31 +72,35 @@ export const configure = () => {
         }
       };
 
-      const data = response.data;
-      traverse(data, transform);
+      if (response.config.validateStatus) {
+        const data = response.data;
+        traverse(data, transform);
+      }
       return response;
     },
     // interceptor for requesting new access tokens, if expired
     async (error) => {
       const originalRequest = error.config;
-      if (
-        (error.response?.status === 401 || error.response?.status === 422) &&
-        originalRequest.url === "/api/auth/refresh"
-      ) {
-        console.log("Login to continue using the api.");
-        localStorage.removeItem(ACCESS_TOKEN);
-        localStorage.removeItem(REFRESH_TOKEN);
-        return Promise.reject(error);
-      }
-      if (error.response.status === 401 && !originalRequest._retry) {
-        originalRequest._retry = true;
-        console.log("Requesting new non-fresh access token . . .");
-        const response = await client.post("/api/auth/refresh");
-        if (!response) return Promise.reject(error);
-        const { accessToken, refreshToken } = response.data as any;
-        localStorage.setItem(ACCESS_TOKEN, accessToken);
-        localStorage.setItem(REFRESH_TOKEN, refreshToken);
-        return client(originalRequest);
+      if (originalRequest.validateStatus) {
+        if (
+          (error.response?.status === 401 || error.response?.status === 422) &&
+          originalRequest.url === "/api/auth/refresh"
+        ) {
+          console.log("Login to continue using the api.");
+          localStorage.removeItem(ACCESS_TOKEN);
+          localStorage.removeItem(REFRESH_TOKEN);
+          return Promise.reject(error);
+        }
+        if (error.response.status === 401 && !originalRequest._retry) {
+          originalRequest._retry = true;
+          console.log("Requesting new non-fresh access token . . .");
+          const response = await client.post("/api/auth/refresh");
+          if (!response) return Promise.reject(error);
+          const { accessToken, refreshToken } = response.data as any;
+          localStorage.setItem(ACCESS_TOKEN, accessToken);
+          localStorage.setItem(REFRESH_TOKEN, refreshToken);
+          return client(originalRequest);
+        }
       }
       return Promise.reject(error);
     }
