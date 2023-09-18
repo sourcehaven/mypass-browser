@@ -1,5 +1,6 @@
 {
   "name": "mypass-browser",
+  "proxy": "http://127.0.0.1:5757",
   "source": "public/index.html",
   "version": "0.1.0",
   "private": true,

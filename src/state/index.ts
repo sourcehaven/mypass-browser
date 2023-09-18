@@ -3,6 +3,8 @@ import { connectRouter } from "connected-react-router";
 import { createBrowserHistory } from "history";
 
 import authReducer from "./auth";
+import vaultReducer from "./vault";
+import themeReducer from "./theme";
 import storage from "redux-persist/lib/storage";
 import {
   PersistConfig,
@@ -21,6 +23,8 @@ export const history = createBrowserHistory();
 const combinedReducer = combineReducers({
   router: connectRouter(history),
   auth: authReducer,
+  vault: vaultReducer,
+  theme: themeReducer,
 });
 
 export type RootState = ReturnType<typeof combinedReducer>;
@@ -28,7 +32,7 @@ export type RootState = ReturnType<typeof combinedReducer>;
 const persistConfig: PersistConfig<RootState> = {
   key: "root",
   storage,
-  whitelist: ["auth", "counter"],
+  whitelist: ["auth", "theme"],
 };
 
 const persistedReducer = persistReducer(persistConfig, combinedReducer);

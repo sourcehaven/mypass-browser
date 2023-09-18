@@ -21,7 +21,7 @@ export const configure = () => {
 
   // request interceptor for configuring authorization headers
   client.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
-    if (config.validateStatus) {
+    if (config?.validateStatus) {
       if (config.url && config.url === "/api/auth/login") {
         const refreshToken = localStorage.getItem(REFRESH_TOKEN);
         config.headers.Authorization = `Bearer ${refreshToken}`;
@@ -50,7 +50,7 @@ export const configure = () => {
       }
     };
 
-    if (config.validateStatus) {
+    if (config?.validateStatus) {
       const data = config.data;
       traverse(data, transform);
     }
@@ -64,7 +64,7 @@ export const configure = () => {
         if (typeof key === "string") {
           const camelizedKey = camelize(key, true);
           o[camelizedKey] = value;
-          if (camelizedKey === key) {
+          if (camelizedKey !== key) {
             delete o[key];
           }
         } else {
@@ -72,7 +72,7 @@ export const configure = () => {
         }
       };
 
-      if (response.config.validateStatus) {
+      if (response.config?.validateStatus) {
         const data = response.data;
         traverse(data, transform);
       }
@@ -81,7 +81,7 @@ export const configure = () => {
     // interceptor for requesting new access tokens, if expired
     async (error) => {
       const originalRequest = error.config;
-      if (originalRequest.validateStatus) {
+      if (originalRequest?.validateStatus) {
         if (
           (error.response?.status === 401 || error.response?.status === 422) &&
           originalRequest.url === "/api/auth/refresh"
@@ -93,13 +93,20 @@ export const configure = () => {
         }
         if (error.response.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
-          console.log("Requesting new non-fresh access token . . .");
+          console.log("Requesting new non-fresh access token.");
           const response = await client.post("/api/auth/refresh");
           if (!response) return Promise.reject(error);
           const { accessToken, refreshToken } = response.data as any;
           localStorage.setItem(ACCESS_TOKEN, accessToken);
           localStorage.setItem(REFRESH_TOKEN, refreshToken);
-          return client(originalRequest);
+          // originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+          if (originalRequest?.data != null) {
+            try {
+              originalRequest.data = JSON.parse(originalRequest.data);
+            } catch (_e) {}
+          }
+          const resp = await client(originalRequest);
+          return resp;
         }
       }
       return Promise.reject(error);

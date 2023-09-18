@@ -22,14 +22,19 @@ import {
   Password as PasswordIcon,
   Folder as FolderIcon,
   Settings as SettingsIcon,
+  LightMode as LightModeIcon,
+  DarkMode as DarkModeIcon,
   ExitToApp as ExitToAppIcon,
 } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
-
-import { actions } from "state/auth";
 import { AnyAction } from "redux";
+import { useSelector } from "react-redux";
 
-const drawerWidth = 240;
+import { actions as authActions } from "state/auth";
+import { actions as themeActions } from "state/theme";
+import { RootState } from "state";
+
+const drawerWidth = "200px";
 
 const openedMixin = (theme: Theme): CSSObject => ({
   width: drawerWidth,
@@ -75,7 +80,7 @@ const AppBar = styled(MuiAppBar, {
   }),
   ...(open && {
     marginLeft: drawerWidth,
-    width: `calc(100% - ${drawerWidth}px)`,
+    width: `calc(100% - ${drawerWidth})`,
     transition: theme.transitions.create(["width", "margin"], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
@@ -83,24 +88,33 @@ const AppBar = styled(MuiAppBar, {
   }),
 }));
 
-const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== "open" })(({ theme, open }) => ({
-  width: drawerWidth,
-  flexShrink: 0,
-  whiteSpace: "nowrap",
-  boxSizing: "border-box",
-  ...(open && {
-    ...openedMixin(theme),
-    "& .MuiDrawer-paper": openedMixin(theme),
-  }),
-  ...(!open && {
-    ...closedMixin(theme),
-    "& .MuiDrawer-paper": closedMixin(theme),
-  }),
-}));
+const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== "open" })(({ theme, open }) => {
+  // const appTheme = useSelector((state: RootState) => state.theme.mode);
+  return {
+    width: drawerWidth,
+    flexShrink: 0,
+    whiteSpace: "nowrap",
+    boxSizing: "border-box",
+    ...(open && {
+      ...openedMixin(theme),
+      "& .MuiDrawer-paper": openedMixin(theme),
+    }),
+    ...(!open && {
+      ...closedMixin(theme),
+      "& .MuiDrawer-paper": closedMixin(theme),
+    }),
+    // ".MuiListItemIcon-root": { color: appTheme === "light" ? theme.palette.primary.light : theme.palette.primary.dark }
+  };
+});
 
-export default function Navbar() {
+type NavbarProps = {
+  mainComponent?: React.ElementType
+}
+
+export default (props: NavbarProps) => {
   const dispatch = useDispatch();
   const theme = useTheme();
+  const appTheme = useSelector((state: RootState) => state.theme);
   const [open, setOpen] = React.useState(false);
 
   const handleDrawerOpen = () => {
@@ -111,16 +125,18 @@ export default function Navbar() {
     setOpen(false);
   };
 
-  const handleLogout = () => dispatch(actions.logout() as unknown as AnyAction);
+  const handleLogout = () => dispatch(authActions.logout() as unknown as AnyAction);
+  const handleAppThemeSwitch = () => dispatch(themeActions.toggleDL() as unknown as AnyAction);
+
+  const MainComponent = props.mainComponent as React.ElementType;
 
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
-      <AppBar color="secondary" position="fixed" open={open}>
+      <AppBar color="default" position="fixed" open={open}>
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
           <Box sx={{ display: "flex" }}>
             <IconButton
-              color="primary"
               aria-label="open drawer"
               onClick={handleDrawerOpen}
               edge="start"
@@ -131,13 +147,16 @@ export default function Navbar() {
             >
               <MenuIcon />
             </IconButton>
-            <Typography variant="h5" noWrap component="div" color="primary" sx={{ alignSelf: "center" }}>
+            <Typography variant="h5" noWrap component="div" sx={{ alignSelf: "center" }}>
               MyPass
             </Typography>
           </Box>
           <Box sx={{ display: "flex" }}>
+            <IconButton aria-label="switch theme" onClick={handleAppThemeSwitch}>
+              {appTheme.mode === "light" ? <DarkModeIcon /> : <LightModeIcon />}
+            </IconButton>
             <IconButton title="Logout" aria-label="Logout" onClick={handleLogout}>
-              <ExitToAppIcon color="primary" />
+              <ExitToAppIcon />
             </IconButton>
           </Box>
         </Toolbar>
@@ -158,7 +177,7 @@ export default function Navbar() {
             return (
               <ListItem key={text as string} disablePadding sx={{ display: "block" }}>
                 <ListItemButton
-                  aria-aria-label={text}
+                  aria-label={text}
                   sx={{
                     minHeight: 48,
                     justifyContent: open ? "initial" : "center",
@@ -187,7 +206,7 @@ export default function Navbar() {
             return (
               <ListItem key={text as string} disablePadding sx={{ display: "block" }}>
                 <ListItemButton
-                  aria-aria-label={text}
+                  aria-label={text}
                   sx={{
                     minHeight: 48,
                     justifyContent: open ? "initial" : "center",
@@ -210,6 +229,12 @@ export default function Navbar() {
           })}
         </List>
       </Drawer>
+      {MainComponent &&
+        <Box component="main" className="container" sx={{ flexGrow: 1, p: 3 }}>
+          <DrawerHeader />
+          <MainComponent />
+        </Box>
+      }
     </Box>
   );
-}
+};

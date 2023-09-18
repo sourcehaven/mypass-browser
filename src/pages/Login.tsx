@@ -51,7 +51,7 @@ export const Login = () => {
             id="password"
             autoComplete="current-password"
           />
-          <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }} color="secondary">
+          <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }} color="inherit">
             Sign In
           </Button>
           <Grid container>
