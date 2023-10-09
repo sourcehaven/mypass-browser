@@ -4,7 +4,7 @@ import { AnyAction } from "redux";
 
 import { actions } from "state/auth/";
 
-export const Login = () => {
+export default () => {
   const dispatch = useDispatch();
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {

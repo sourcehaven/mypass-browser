@@ -1,6 +1,6 @@
 import { Box, Button, Container, CssBaseline, Grid, Link, TextField, Typography } from "@mui/material";
 
-export const Registration = () => {
+export default () => {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);

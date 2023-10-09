@@ -22,6 +22,7 @@ import {
   Password as PasswordIcon,
   Folder as FolderIcon,
   Settings as SettingsIcon,
+  Info as InfoIcon,
   LightMode as LightModeIcon,
   DarkMode as DarkModeIcon,
   ExitToApp as ExitToAppIcon,
@@ -32,6 +33,7 @@ import { useSelector } from "react-redux";
 
 import { actions as authActions } from "state/auth";
 import { actions as themeActions } from "state/theme";
+import { actions as pageActions } from "state/page";
 import { RootState } from "state";
 
 const drawerWidth = "200px";
@@ -108,13 +110,13 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== "open" 
 });
 
 type NavbarProps = {
-  mainComponent?: React.ElementType
-}
+  mainComponent?: React.ElementType;
+};
 
 export default (props: NavbarProps) => {
   const dispatch = useDispatch();
   const theme = useTheme();
-  const appTheme = useSelector((state: RootState) => state.theme);
+  const appTheme = useSelector((state: RootState) => state.theme.mode);
   const [open, setOpen] = React.useState(false);
 
   const handleDrawerOpen = () => {
@@ -133,10 +135,11 @@ export default (props: NavbarProps) => {
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
-      <AppBar color="default" position="fixed" open={open}>
+      <AppBar position="fixed" open={open}>
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
           <Box sx={{ display: "flex" }}>
             <IconButton
+              color="inherit"
               aria-label="open drawer"
               onClick={handleDrawerOpen}
               edge="start"
@@ -152,10 +155,10 @@ export default (props: NavbarProps) => {
             </Typography>
           </Box>
           <Box sx={{ display: "flex" }}>
-            <IconButton aria-label="switch theme" onClick={handleAppThemeSwitch}>
-              {appTheme.mode === "light" ? <DarkModeIcon /> : <LightModeIcon />}
+            <IconButton color="inherit" aria-label="switch theme" onClick={handleAppThemeSwitch}>
+              {appTheme === "light" ? <DarkModeIcon /> : <LightModeIcon />}
             </IconButton>
-            <IconButton title="Logout" aria-label="Logout" onClick={handleLogout}>
+            <IconButton color="inherit" title="Logout" aria-label="Logout" onClick={handleLogout}>
               <ExitToAppIcon />
             </IconButton>
           </Box>
@@ -170,71 +173,70 @@ export default (props: NavbarProps) => {
         <Divider />
         <List>
           {[
-            ["Passwords", PasswordIcon],
-            ["Folders", FolderIcon],
-          ].map((item) => {
-            const [text, Icon] = item as [string, React.FC];
-            return (
-              <ListItem key={text as string} disablePadding sx={{ display: "block" }}>
-                <ListItemButton
-                  aria-label={text}
+            { Icon: PasswordIcon, label: "Passwords", action: () => dispatch(pageActions.switchToPasswords()) },
+            { Icon: FolderIcon, label: "Folders", action: () => dispatch(pageActions.switchToFolders()) },
+          ].map((item) => (
+            <ListItem key={item.label} disablePadding sx={{ display: "block" }}>
+              <ListItemButton
+                onClick={item.action}
+                aria-label={item.label}
+                sx={{
+                  minHeight: 48,
+                  justifyContent: open ? "initial" : "center",
+                  px: 2.5,
+                }}
+              >
+                <ListItemIcon
                   sx={{
-                    minHeight: 48,
-                    justifyContent: open ? "initial" : "center",
-                    px: 2.5,
+                    minWidth: 0,
+                    mr: open ? 3 : "auto",
+                    justifyContent: "center",
                   }}
                 >
-                  <ListItemIcon
-                    sx={{
-                      minWidth: 0,
-                      mr: open ? 3 : "auto",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Icon />
-                  </ListItemIcon>
-                  <ListItemText primary={text as string} sx={{ opacity: open ? 1 : 0 }} />
-                </ListItemButton>
-              </ListItem>
-            );
-          })}
+                  <item.Icon />
+                </ListItemIcon>
+                <ListItemText primary={item.label} sx={{ opacity: open ? 1 : 0 }} />
+              </ListItemButton>
+            </ListItem>
+          ))}
         </List>
         <Divider />
         <List>
-          {[["Settings", SettingsIcon]].map((item) => {
-            const [text, Icon] = item as [string, React.FC];
-            return (
-              <ListItem key={text as string} disablePadding sx={{ display: "block" }}>
-                <ListItemButton
-                  aria-label={text}
+          {[
+            { Icon: SettingsIcon, label: "Settings", action: () => dispatch(pageActions.switchToSettings()) },
+            { Icon: InfoIcon, label: "About", action: () => dispatch(pageActions.switchToAbout()) },
+          ].map((item) => (
+            <ListItem key={item.label} disablePadding sx={{ display: "block" }}>
+              <ListItemButton
+                onClick={item.action}
+                aria-label={item.label}
+                sx={{
+                  minHeight: 48,
+                  justifyContent: open ? "initial" : "center",
+                  px: 2.5,
+                }}
+              >
+                <ListItemIcon
                   sx={{
-                    minHeight: 48,
-                    justifyContent: open ? "initial" : "center",
-                    px: 2.5,
+                    minWidth: 0,
+                    mr: open ? 3 : "auto",
+                    justifyContent: "center",
                   }}
                 >
-                  <ListItemIcon
-                    sx={{
-                      minWidth: 0,
-                      mr: open ? 3 : "auto",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Icon />
-                  </ListItemIcon>
-                  <ListItemText primary={text as string} sx={{ opacity: open ? 1 : 0 }} />
-                </ListItemButton>
-              </ListItem>
-            );
-          })}
+                  <item.Icon />
+                </ListItemIcon>
+                <ListItemText primary={item.label} sx={{ opacity: open ? 1 : 0 }} />
+              </ListItemButton>
+            </ListItem>
+          ))}
         </List>
       </Drawer>
-      {MainComponent &&
+      {MainComponent && (
         <Box component="main" className="container" sx={{ flexGrow: 1, p: 3 }}>
           <DrawerHeader />
           <MainComponent />
         </Box>
-      }
+      )}
     </Box>
   );
 };

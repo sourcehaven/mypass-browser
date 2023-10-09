@@ -3,6 +3,7 @@ import { connectRouter } from "connected-react-router";
 import { createBrowserHistory } from "history";
 
 import authReducer from "./auth";
+import pageReducer from "./page";
 import vaultReducer from "./vault";
 import themeReducer from "./theme";
 import storage from "redux-persist/lib/storage";
@@ -23,6 +24,7 @@ export const history = createBrowserHistory();
 const combinedReducer = combineReducers({
   router: connectRouter(history),
   auth: authReducer,
+  page: pageReducer,
   vault: vaultReducer,
   theme: themeReducer,
 });

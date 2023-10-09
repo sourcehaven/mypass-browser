@@ -5,15 +5,15 @@ import { AnyAction } from "redux";
 import { ThemeProvider, createTheme } from "@mui/material";
 
 import Navbar from "components/Navbar";
-import { About, Home, Login, Registration } from "pages";
+import { MainPage, LoginPage, RegistrationPage } from "pages";
 import { RootState } from "state";
 import { actions } from "state/auth";
 import { useConstructor } from "utils";
 
-const baseTheme: ThemeOptions = {
+export const baseTheme: ThemeOptions = {
   palette: {
     primary: {
-      main: "#3f51b5",
+      main: "#37474f",
     },
     secondary: {
       main: "#f50057",
@@ -25,6 +25,9 @@ const lightTheme: ThemeOptions = {
   ...baseTheme,
   palette: {
     mode: "light",
+    background: {
+      default: "#fafafa",
+    },
     ...baseTheme.palette,
   },
 };
@@ -32,6 +35,10 @@ const darkTheme: ThemeOptions = {
   ...baseTheme,
   palette: {
     mode: "dark",
+    background: {
+      default: "#121212",
+      paper: "#111518",
+    },
     ...baseTheme.palette,
   },
 };
@@ -60,13 +67,12 @@ const App = () => {
           <Routes>
             {loggedIn ? (
               <>
-                <Route path="/" element={<Navbar mainComponent={Home}/>} />
-                <Route path="/about" element={<Navbar mainComponent={About}/>} />
+                <Route path="/" element={<Navbar mainComponent={MainPage} />} />
               </>
             ) : (
               <>
-                <Route path="/" element={<Login />} />
-                <Route path="/registration" element={<Registration />} />
+                <Route path="/" element={<LoginPage />} />
+                <Route path="/registration" element={<RegistrationPage />} />
               </>
             )}
           </Routes>

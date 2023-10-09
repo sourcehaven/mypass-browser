@@ -1,4 +1,3 @@
-export { About } from "./About";
-export { Home } from "./Home";
-export { Login } from "./Login";
-export { Registration } from "./Registration";
+export { default as MainPage, PasswordPage, AboutPage } from "./main";
+export { default as LoginPage } from "./Login";
+export { default as RegistrationPage } from "./Registration";
