@@ -1,30 +1,15 @@
-import os from "os";
-import path from "path";
 import axios, { InternalAxiosRequestConfig } from "axios";
-import { Sequelize, DataTypes, Op } from "sequelize";
 import { camelize, underscore } from "inflection";
 
-import { ACCESS_TOKEN, REFRESH_TOKEN } from ".";
-
-const homedir = os.homedir();
-const storePath = path.join(homedir, ".mypass", "store");
-const dbUri = path.join(storePath, "kvstore.sqlite");
-// sqlite db connection
-const sequelize = new Sequelize({ dialect: "sqlite", database: dbUri });
-type KV = { key: string; value: string };
-const KeyValue = sequelize.define("KeyValue", {
-  key: {
-    type: DataTypes.STRING(255),
-    primaryKey: true,
-  },
-  value: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-});
-(() => async () => {
-  await KeyValue.sync();
-})();
+import {
+  ACCESS_TOKEN,
+  REFRESH_TOKEN,
+  getAccessToken,
+  getRefreshToken,
+  setAccessToken,
+  setRefreshToken,
+  removeTokens,
+} from ".";
 
 const traverse = (o: any, func: Function) => {
   for (const i in o) {
@@ -46,26 +31,16 @@ export const configure = () => {
   client.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
     if (config?.validateStatus) {
       if (config.url && config.url === "/api/auth/login") {
-        const kvItem = await KeyValue.findByPk(REFRESH_TOKEN);
-        if (kvItem && kvItem instanceof KeyValue) {
-          const refreshToken = (kvItem as unknown as KV).value;
-          config.headers.Authorization = `Bearer ${refreshToken}`;
-        }
+        const refreshToken = await getRefreshToken();
+        config.headers.Authorization = `Bearer ${refreshToken}`;
         return config;
       } else if (config.url && config.url === "/api/auth/refresh") {
-        const kvItem = await KeyValue.findByPk(REFRESH_TOKEN);
-        if (kvItem && kvItem instanceof KeyValue) {
-          const refreshToken = (kvItem as unknown as KV).value;
-          config.headers.Authorization = `Bearer ${refreshToken}`;
-        }
+        const refreshToken = await getRefreshToken();
+        config.headers.Authorization = `Bearer ${refreshToken}`;
         return config;
       }
-      const kvItem = await KeyValue.findByPk(ACCESS_TOKEN);
-      if (kvItem && kvItem instanceof KeyValue) {
-        const accessToken = (kvItem as unknown as KV).value;
-        config.headers.Authorization = `Bearer ${accessToken}`;
-      }
-      return config;
+      const accessToken = await getAccessToken();
+      config.headers.Authorization = `Bearer ${accessToken}`;
     }
     return config;
   });
@@ -120,14 +95,7 @@ export const configure = () => {
           originalRequest.url === "/api/auth/refresh"
         ) {
           console.log("Login to continue using the api.");
-          await KeyValue.destroy({
-            where: {
-              key: {
-                [Op.or]: [ACCESS_TOKEN, REFRESH_TOKEN],
-              },
-            },
-          });
-          await KeyValue.sync();
+          await removeTokens();
           return Promise.reject(error);
         }
         if (error.response.status === 401 && !originalRequest._retry) {
@@ -136,9 +104,8 @@ export const configure = () => {
           const response = await client.post("/api/auth/refresh");
           if (!response) return Promise.reject(error);
           const { accessToken, refreshToken } = response.data as any;
-          await KeyValue.upsert({ key: ACCESS_TOKEN, value: accessToken });
-          await KeyValue.upsert({ key: REFRESH_TOKEN, value: refreshToken });
-          await KeyValue.sync();
+          await setAccessToken(accessToken);
+          await setRefreshToken(refreshToken);
           // originalRequest.headers.Authorization = `Bearer ${accessToken}`;
           if (originalRequest?.data != null) {
             try {

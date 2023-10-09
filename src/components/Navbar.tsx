@@ -130,7 +130,7 @@ export default (props: NavbarProps) => {
   const handleLogout = () => dispatch(authActions.logout() as unknown as AnyAction);
   const handleAppThemeSwitch = () => dispatch(themeActions.toggleDL() as unknown as AnyAction);
 
-  const MainComponent = props.mainComponent as React.ElementType;
+  const MainComponent = props.mainComponent;
 
   return (
     <Box sx={{ display: "flex" }}>
