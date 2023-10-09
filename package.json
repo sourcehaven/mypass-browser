@@ -1,6 +1,7 @@
 {
   "name": "mypass-browser",
   "proxy": "http://127.0.0.1:5757",
+  "source": "public/index.html",
   "targets": {
     "main": {
       "distDir": "public"
@@ -84,6 +85,7 @@
     "parcel-build-chrome-extension": "cross-env NODE_ENV=production parcel build --target=extension && parcel build --target=main",
     "react-start": "cross-env NODE_ENV=development react-scripts start",
     "react-build": "cross-env NODE_ENV=serving react-scripts build",
+    "react-build-chrome-extension": "cross-env NODE_ENV=production react-scripts build",
     "react-test": "cross-env NODE_ENV=testing react-scripts test",
     "react-eject": "react-scripts eject",
     "lint": "eslint src --ext .js,.jsx,.ts,.tsx",
